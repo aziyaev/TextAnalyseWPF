@@ -106,6 +106,13 @@ namespace TextAnalyseWPF.ViewModels
             }
         }
 
+        public List<AlgorithmType> Algorithms
+        {
+            get
+            {
+                return Enum.GetValues(typeof(AlgorithmType)).Cast<AlgorithmType>().ToList();
+            }
+        }
         public event PropertyChangedEventHandler PropertyChanged;
 
         public MainViewModel()
@@ -128,14 +135,18 @@ namespace TextAnalyseWPF.ViewModels
         private void Compare()
         {
             var comparer = new TextAnalyseModel();
-            if(SelectedAlgorithm == AlgorithmType.Levenshtein)
+            switch (SelectedAlgorithm)
             {
-                Result = comparer.CompareTextsUsingLevenshtein(TextA, TextB, IgnoreCase);
+                case AlgorithmType.Levenshtein:
+                    Result = comparer.CompareTextsUsingLevenshtein(TextA, TextB, IgnoreCase);
+                    break;
+                case AlgorithmType.NGrams:
+                    Result = comparer.CompareTextsUsingNGrams(TextA, TextB, IgnoreCase);
+                    break;
+                default:
+                    break;
             }
-            else
-            {
-                Result = comparer.CompareTextsUsingNGrams(TextA, TextB, IgnoreCase);
-            }
+            
             OnPropertyChanged(nameof(ResultText));
         }
 

@@ -86,7 +86,22 @@ namespace TextAnalyseWPF.Models
 
         private double CalculateSimilarityOnNgrams(string textA, string textB)
         {
-            const int ngrams = 3;
+            if(textA.Length == 1 && textB.Length == 1)
+            {
+                return textA == textB ? 1.0 : 0.0;
+            }
+
+            const int minLength = 50;
+            const int maxLength = 500;
+
+            int lenghtA = textA.Length;
+            int lenghtB = textB.Length;
+
+            int nA = GetNgramSize(lenghtA, minLength, maxLength);
+            int nB = GetNgramSize(lenghtB, minLength, maxLength);
+
+            int ngrams = Math.Min(nA, nB);
+
             var ngramsA = GetNgrams(textA, ngrams);
             var ngramsB = GetNgrams(textB, ngrams);
 
@@ -101,6 +116,22 @@ namespace TextAnalyseWPF.Models
             for(int i = 0; i < text.Length - n + 1; i++)
             {
                 yield return text.Substring(i, n);
+            }
+        }
+
+        private int GetNgramSize(int lenght, int minLength, int maxLength)
+        {
+            if(lenght < minLength)
+            {
+                return 2;
+            }
+            else if(lenght > maxLength)
+            {
+                return 3;
+            }
+            else
+            {
+                return 2 + (int)Math.Floor((lenght - minLength) / (double)(maxLength - minLength) * 3);
             }
         }
 
