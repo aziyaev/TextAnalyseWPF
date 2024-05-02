@@ -18,7 +18,9 @@ namespace TextAnalyseWPF.ViewModels
             [Description("Расстояние Левенштейна")]
             Levenshtein,
             [Description("N-граммы")]
-            NGrams
+            NGrams,
+            [Description("Подсчет одинаковых слов")]
+            WordCount
         }
 
         private string _textA;
@@ -135,6 +137,7 @@ namespace TextAnalyseWPF.ViewModels
         private void Compare()
         {
             var comparer = new TextAnalyseModel();
+
             switch (SelectedAlgorithm)
             {
                 case AlgorithmType.Levenshtein:
@@ -142,6 +145,9 @@ namespace TextAnalyseWPF.ViewModels
                     break;
                 case AlgorithmType.NGrams:
                     Result = comparer.CompareTextsUsingNGrams(TextA, TextB, IgnoreCase);
+                    break;
+                case AlgorithmType.WordCount:
+                    Result = comparer.CompareTextsUsingWordCount(TextA, TextB, IgnoreCase);
                     break;
                 default:
                     break;

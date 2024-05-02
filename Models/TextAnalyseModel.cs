@@ -11,14 +11,8 @@ namespace TextAnalyseWPF.Models
     {
         public double CompareTextsUsingLevenshtein(string textA, string textB, bool ignoreCase)
         {
-            if (string.IsNullOrWhiteSpace(textA) && string.IsNullOrWhiteSpace(textB))
-            {
-                return 1;
-            }
-            if (string.IsNullOrWhiteSpace(textA) || string.IsNullOrWhiteSpace(textB))
-            {
-                return 0;
-            }
+            if (ValidateTextsIsBothEqualNullOrWhiteSpace(textA, textB)) return 1.0;
+            if (ValidateTextsIsOneOfThemEqualNullOrWhiteSpace(textA, textB)) return 0;
 
             if (ignoreCase)
             {
@@ -34,14 +28,8 @@ namespace TextAnalyseWPF.Models
 
         public double CompareTextsUsingNGrams(string textA, string textB, bool ignoreCase)
         {
-            if (string.IsNullOrWhiteSpace(textA) && string.IsNullOrWhiteSpace(textB))
-            {
-                return 1;
-            }
-            if (string.IsNullOrWhiteSpace(textA) || string.IsNullOrWhiteSpace(textB))
-            {
-                return 0;
-            }
+            if (ValidateTextsIsBothEqualNullOrWhiteSpace(textA, textB)) return 1.0;
+            if (ValidateTextsIsOneOfThemEqualNullOrWhiteSpace(textA, textB)) return 0;
 
             if (ignoreCase)
             {
@@ -55,8 +43,40 @@ namespace TextAnalyseWPF.Models
             return CalculateSimilarityOnNgrams(textA, textB);
         }
 
+        public double CompareTextsUsingWordCount(string textA, string textB, bool ignoreCase)
+        {
+            if (ValidateTextsIsBothEqualNullOrWhiteSpace(textA, textB)) return 1.0;
+            if (ValidateTextsIsOneOfThemEqualNullOrWhiteSpace(textA, textB)) return 0;
+
+            if (ignoreCase)
+            {
+                textA = textA.ToLower();
+                textB = textB.ToLower();
+            }
+
+            textA = RemovePunctuation(textA);
+            textB = RemovePunctuation(textB);
+
+            return CalculateSimilarityOnWordCount(textA, textB);
+        }
+
+        private double CalculateSimilarityOnWordCount(string textA, string textB)
+        {
+            if (ValidateTextsIsBothEqualNullOrWhiteSpace(textA, textB)) return 1.0;
+            if (ValidateTextsIsOneOfThemEqualNullOrWhiteSpace(textA, textB)) return 0;
+
+            var wordsA = textA.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            var wordsB = textB.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            var intersectionCount = wordsA.Intersect(wordsB).Count();
+            var unionCount = wordsA.Union(wordsB).Count();
+            return (double)intersectionCount / unionCount;
+        }
+
         private double CalculateSimilarityOnLevenshtein(string textA, string textB)
         {
+            if (ValidateTextsIsBothEqualNullOrWhiteSpace(textA, textB)) return 1.0;
+            if (ValidateTextsIsOneOfThemEqualNullOrWhiteSpace(textA, textB)) return 0;
+
             int n = textA.Length;
             int m = textB.Length;
             int[,] d = new int[n + 1, m + 1];
@@ -86,10 +106,8 @@ namespace TextAnalyseWPF.Models
 
         private double CalculateSimilarityOnNgrams(string textA, string textB)
         {
-            if(textA.Length == 1 && textB.Length == 1)
-            {
-                return textA == textB ? 1.0 : 0.0;
-            }
+            if (ValidateTextsIsBothEqualNullOrWhiteSpace(textA, textB)) return 1.0;
+            if (ValidateTextsIsOneOfThemEqualNullOrWhiteSpace(textA, textB)) return 0;
 
             const int minLength = 50;
             const int maxLength = 500;
@@ -139,6 +157,26 @@ namespace TextAnalyseWPF.Models
         {
             text = text.Trim();
             return Regex.Replace(text, @"[^\w\s]", "");
+        }
+
+        private bool ValidateTextsIsBothEqualNullOrWhiteSpace(string textA, string textB)
+        {
+            if (string.IsNullOrWhiteSpace(textA) && string.IsNullOrWhiteSpace(textB))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool ValidateTextsIsOneOfThemEqualNullOrWhiteSpace(string textA, string textB)
+        {
+            if (string.IsNullOrWhiteSpace(textA) || string.IsNullOrWhiteSpace(textB))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }
